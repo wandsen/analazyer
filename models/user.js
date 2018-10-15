@@ -15,22 +15,22 @@ module.exports = (dbPoolInstance) => {
 
     const checkusername = (user, callback) => {
 
-          let currentuser = user
-          console.log("current user", user)
-          // set up query
-          const queryString = 'SELECT username FROM users';
+        let currentuser = user
+        console.log("current user", user)
+        // set up query
+        const queryString = 'SELECT username FROM users';
 
 
-          // execute query
-          dbPoolInstance.query(queryString, (error, queryResult) => {
+        // execute query
+        dbPoolInstance.query(queryString, (error, queryResult) => {
             console.log('check username result', queryResult.rows)
 
             let checkresult = false;
 
-            queryResult.rows.forEach((element)=>{
+            queryResult.rows.forEach((element) => {
                 console.log('executing function')
 
-                if (currentuser === element.username){
+                if (currentuser === element.username) {
                     checkresult = true;
                     console.log('there is an existing username')
 
@@ -38,68 +38,68 @@ module.exports = (dbPoolInstance) => {
 
             });
 
-            if (checkresult === false){
-                callback(error , request.body)
+            if (checkresult === false) {
+                callback(error, request.body)
             }
 
 
-          });
+        });
     };
 
 
-    const authentication = (user, callback)=>{
+    const authentication = (user, callback) => {
         let hashedValue = sha256(user.password);
 
         const queryString = 'SELECT * FROM users';
 
-      dbPoolInstance.query(queryString, (error, queryResult) => {
+        dbPoolInstance.query(queryString, (error, queryResult) => {
 
-        let authenticationResult;
+            let authenticationResult;
 
-        queryResult.rows.forEach((element)=>{
-            if (user.name === element.username){
+            queryResult.rows.forEach((element) => {
+                if (user.name === element.username) {
 
-                if(hashedValue === element.password){
-                    console.log("this is the correct user and password")
-                    authenticationResult = true;
+                    if (hashedValue === element.password) {
+                        console.log("this is the correct user and password")
+                        authenticationResult = true;
 
-                }else{
-                    console.log("this is the wrong password")
+                    } else {
+                        console.log("this is the wrong password")
+                    }
+
+
+                } else {
+                    console.log("there is no such username")
                 }
 
-
-            }else{
-                    console.log("there is no such username")
+            });
+            if (authenticationResult === true) {
+                let loginValue = sha256(SALT + user.password)
+                console.log("cookie loginvalue: ", loginValue)
+                callback(error, queryResult, loginValue)
             }
 
-      });
-        if(authenticationResult === true){
-            let loginValue = sha256(SALT + user.password)
-            console.log("cookie loginvalue: ", loginValue)
-            callback(error, queryResult, loginValue)
-        }
-
-    });
+        });
     };
 
 
     const create = (user, callback) => {
 
-          var hashedValue = sha256(user.password);
+        var hashedValue = sha256(user.password);
 
-          // set up query
-          const queryString = 'INSERT INTO users (username, password) VALUES ($1, $2)';
-          const values = [
+        // set up query
+        const queryString = 'INSERT INTO users (username, password) VALUES ($1, $2)';
+        const values = [
             user.username,
             hashedValue
-          ];
+        ];
 
-          // execute query
-          dbPoolInstance.query(queryString, values, (error, queryResult) => {
+        // execute query
+        dbPoolInstance.query(queryString, values, (error, queryResult) => {
             // invoke callback function with results after query has executed
             console.log("added username")
             callback(error, queryResult);
-          });
+        });
         // });
     };
 
@@ -107,131 +107,153 @@ module.exports = (dbPoolInstance) => {
 
 
 
-    const getIndexData =(callback)=>{
+    const getIndexData = (callback) => {
 
-    request('https://financialmodelingprep.com/api/majors-indexes', { json: true }, (err, res, body) => {
-      if (err) { return console.log(err); }
+        request('https://financialmodelingprep.com/api/majors-indexes', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
 
-        let string = res.body
-        let slicestring = string.slice(5, -5)
+            let string = res.body
+            let slicestring = string.slice(5, -5)
 
 
-        // console.log(res.body)
-        callback("error", JSON.parse(slicestring))
+            // console.log(res.body)
+            callback("error", JSON.parse(slicestring))
 
-    });
+        });
     }
 
-    const incomeStatement2 =(stockname, callback)=>{
+    const incomeStatement2 = (stockname, callback) => {
 
-    request('https://financialmodelingprep.com/api/financials/income-statement/'+'AAPL', { json: true }, (err, res, body) => {
-      if (err) { return console.log(err); }
+        request('https://financialmodelingprep.com/api/financials/income-statement/' + 'AAPL', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
 
-        let string = res.body
-        let slicestring = string.slice(5, -5)
+            let string = res.body
+            let slicestring = string.slice(5, -5)
 
 
-        //JSON.parse(slicestring) is an object
-        // callback("error", JSON.parse(slicestring))
-        return JSON.parse(slicestring)
+            //JSON.parse(slicestring) is an object
+            // callback("error", JSON.parse(slicestring))
+            return JSON.parse(slicestring)
 
-    });
+        });
     }
 
 
-    const balanceSheet2 =(stockname, callback)=>{
+    const balanceSheet2 = (stockname, callback) => {
 
-    request('https://financialmodelingprep.com/api/financials/balance-sheet-statement/'+'AAPL', { json: true }, (err, res, body) => {
-      if (err) { return console.log(err); }
+        request('https://financialmodelingprep.com/api/financials/balance-sheet-statement/' + 'AAPL', { json: true }, (err, res, body) => {
+            if (err) { return console.log(err); }
 
-        let string = res.body
-        let slicestring = string.slice(5, -5)
+            let string = res.body
+            let slicestring = string.slice(5, -5)
 
 
 
-        //JSON.parse(slicestring) is an object
-        // callback("error", JSON.parse(slicestring))
-        return JSON.parse(slicestring)
+            //JSON.parse(slicestring) is an object
+            // callback("error", JSON.parse(slicestring))
+            return JSON.parse(slicestring)
 
-    });
+        });
     }
 
 
     //this function returns an object that contains cashflow data
-    const cashFlowStatement = async(stockname) => {
+    const cashFlowStatement = async (stockname) => {
         let request = {
-            uri: 'https://financialmodelingprep.com/api/financials/cash-flow-statement/'+stockname
+            uri: 'https://financialmodelingprep.com/api/financials/cash-flow-statement/' + stockname
         }
 
         try {
             var preOutput = await rp(request)
             var output = preOutput.slice(5, -5)
 
-        }catch(error) {
+        } catch (error) {
             return error;
 
         }
 
 
-    return JSON.parse(output)
+        return JSON.parse(output)
     }
 
 
     //this function returns an object that contains cashflow data
-    const incomeStatement = async(stockname) => {
+    const incomeStatement = async (stockname) => {
         let request = {
-            uri: 'https://financialmodelingprep.com/api/financials/income-statement/'+ stockname
+            uri: 'https://financialmodelingprep.com/api/financials/income-statement/' + stockname
         }
 
         try {
             var preOutput = await rp(request)
             var output = preOutput.slice(5, -5)
 
-        }catch(error) {
+        } catch (error) {
             return error;
 
         }
 
 
-    return JSON.parse(output)
+        return JSON.parse(output)
     }
 
     //this function returns an object that contains cashflow data
-    const balanceSheet = async(stockname) => {
+    const balanceSheet = async (stockname) => {
         let request = {
-            uri: 'https://financialmodelingprep.com/api/financials/balance-sheet-statement/'+stockname
+            uri: 'https://financialmodelingprep.com/api/financials/balance-sheet-statement/' + stockname
         }
 
         try {
             var preOutput = await rp(request)
             var output = preOutput.slice(5, -5)
 
-        }catch(error) {
+        } catch (error) {
             return error;
 
         }
 
 
-    return JSON.parse(output)
+        return JSON.parse(output)
     }
 
     //this function returns an object that contains current price data
-    const currentPrice = async(stockname) => {
+    const currentPrice = async (stockname) => {
         let request = {
-            uri: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol='+stockname+'&outputsize=compact&apikey=KKTLO8DUTHHVG5S1'
+            uri: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + stockname + '&outputsize=compact&apikey=KKTLO8DUTHHVG5S1'
         }
 
         try {
             var output = await rp(request)
 
-        }catch(error) {
+        } catch (error) {
             return error;
 
         }
 
 
-    return JSON.parse(output)
+        return JSON.parse(output)
     }
+
+
+
+    const dcf = async (stockname) => {
+        let request = {
+            uri: 'https://financialmodelingprep.com/api/company/discounted-cash-flow/' + stockname
+        }
+
+        try {
+            var preOutput = await rp(request)
+            var output = preOutput.slice(5, -5)
+
+        } catch (error) {
+            return error;
+
+        }
+
+
+        return JSON.parse(output)
+    }
+
+
 
     // const currentPriceOld = (stockname, callback)=>{
 
@@ -248,7 +270,7 @@ module.exports = (dbPoolInstance) => {
     // }
 
 
-    const updatedatabase = (stockname, jsonfile) =>{
+    const updatedatabase = (stockname, jsonfile) => {
 
         console.log("running update database")
 
@@ -266,8 +288,8 @@ module.exports = (dbPoolInstance) => {
 
 
             // console.log(queryResult.rowcount)
-            if (queryResult.rows.length >= 1){
-                console.log("updating financialreport database" , queryResult.rows.length )
+            if (queryResult.rows.length >= 1) {
+                console.log("updating financialreport database", queryResult.rows.length)
 
 
                 //change update database
@@ -283,7 +305,7 @@ module.exports = (dbPoolInstance) => {
                 })
 
 
-            }else{
+            } else {
                 console.log('creating new entry in financialreport database')
 
                 const query = 'INSERT INTO financialreport (name, data) VALUES ($1, $2)';
@@ -304,7 +326,7 @@ module.exports = (dbPoolInstance) => {
 
 
     //this function returns an object with annual report data
-    const financialStatement =async(stockname, callback)=>{
+    const financialStatement = async (stockname, callback) => {
 
         let combinedAR = {};
 
@@ -316,13 +338,14 @@ module.exports = (dbPoolInstance) => {
 
         combinedAR['currentPrice'] = await currentPrice(stockname)
 
-        combinedAR.name = stockname
+        combinedAR['dcf'] = await dcf(stockname)
 
-        console.log("financial statement" , JSON.stringify(combinedAR))
+        combinedAR.name = stockname
 
         //update database when call is made
         updatedatabase(stockname, JSON.stringify(combinedAR))
 
+        console.log('test')
 
 
         callback("error", combinedAR)
@@ -331,16 +354,16 @@ module.exports = (dbPoolInstance) => {
 
     const addstock = (user, callback) => {
 
-          const queryString = 'INSERT INTO followstock (username, stockname) VALUES ($1, $2)';
-          const values = [
+        const queryString = 'INSERT INTO followstock (username, stockname) VALUES ($1, $2)';
+        const values = [
             user.username,
             user.stockname
-          ];
+        ];
 
-          dbPoolInstance.query(queryString, values, (error, queryResult) => {
+        dbPoolInstance.query(queryString, values, (error, queryResult) => {
             console.log("added stock")
             callback(error, queryResult);
-          });
+        });
     };
 
 
@@ -363,64 +386,35 @@ module.exports = (dbPoolInstance) => {
     // };
 
 
-    const watchlistdata = (stockname)=>{
+    // const watchlistdata = (stockname)=>{
 
-        const queryString = 'SELECT data FROM financialreport WHERE name = $1';
+    //     const queryString = 'SELECT data FROM financialreport WHERE name = $1';
 
-        const values = [stockname]
+    //     const values = [stockname]
 
-        return dbPoolInstance.query(queryString, values,  (error, queryResult) => {
+    //     dbPoolInstance.query(queryString, values,  (error, queryResult) => {
 
-            console.log("watchlistdata", queryResult.rows)
+    //         console.log("watchlistdata", queryResult.rows)
 
-            return queryResult
+    //         return queryResult
 
-        });
+    //     });
 
-    };
+    // };
 
 
 
     const watchlist = (user, callback) => {
 
-            console.log("username in watchlist" , user)
+        const queryString = 'SELECT financialreport.data FROM followstock INNER JOIN financialreport ON followstock.stockname = financialreport.name WHERE followstock.username = $1';
 
-          const queryString = 'SELECT * FROM followstock WHERE username = $1';
+        const values = [user]
+        dbPoolInstance.query(queryString, values, (error, queryResult) => {
 
-          const values = [user]
-
-
-          dbPoolInstance.query(queryString, values,  async(error, queryResult) => {
-            console.log("watchlist" , queryResult.rows)
-
-            console.log('WLD:',watchlistdata)
-
-            let currentstock = queryResult.rows[0]['stockname']
-
-            let data = await watchlistdata(currentstock)
-
-            console.log('currentstock ' , currentstock)
-            console.log("data" , data)
-
-
-            //loop through names of watchlist and generate all the date from api through another function
-
-            // let combinedwatchlist = {};
-
-            //     queryResult.rows.forEach(async(element)=>{
-            //         let currentstock = element.stockname
-
-            //     combinedwatchlist = await watchlistdata(currentstock)
-
-            //     console.log("combined watch list" , combinedwatchlist)
-
-
-
-            // // callback(error, queryResult);
-            // });
-
+            callback(error, queryResult.rows);
 
         });
+
     };
 
 
@@ -428,6 +422,7 @@ module.exports = (dbPoolInstance) => {
 
     return {
         checkusername,
+        dcf,
         authentication,
         currentPrice,
         getIndexData,
@@ -437,11 +432,9 @@ module.exports = (dbPoolInstance) => {
         financialStatement,
         create,
         addstock,
-        watchlist,
-        watchlistdata
+        watchlist
+        // watchlistdata
 
 
     };
 };
-
-

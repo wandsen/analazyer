@@ -1,39 +1,37 @@
 module.exports = (db) => {
 
-      /**
-   * ===========================================
-   * Controller logic
-   * ===========================================
-   */
+    /**
+     * ===========================================
+     * Controller logic
+     * ===========================================
+     */
 
     const testdisplay = (request, response) => {
 
-    //stock requested could be e.g.AAPL
-    let username = request.params.id
-    console.log('request path', username)
-    // console.log(stockrequested)
+        //stock requested could be e.g.AAPL
+        let username = request.params.id
+        console.log('request path', username)
+        // console.log(stockrequested)
 
-    // db.user.checkusername(username, (error, result)=>{
+        // db.user.checkusername(username, (error, result)=>{
 
-    //         // response.render('stock/StockDisplay', {stockresult:result});
+        //         // response.render('stock/StockDisplay', {stockresult:result});
 
-    //         response.send(result)
-    //     })
+        //         response.send(result)
+        //     })
 
     };
 
 
     const userpage = (request, response) => {
 
-        console.log("loading userpage" , request.cookies.username)
         let username = request.cookies.username
 
+        db.user.watchlist(username, (error, result) => {
 
-        db.user.watchlist(username, (error, result)=>{
+            // console.log("controller userpage watchlist", result)
 
-            console.log("watchlist", result)
-
-            response.render('user/UserPage', {username: username, watchlist:result })
+            response.render('user/UserPage', { username: username, watchlist: result })
 
         });
     };
@@ -43,12 +41,12 @@ module.exports = (db) => {
 
     const addstock = (request, response) => {
 
-    db.user.addstock(request.body, (error, result)=>{
+        db.user.addstock(request.body, (error, result) => {
 
 
-        let redirectUrl = '/user/' + request.body.username
+            let redirectUrl = '/user/' + request.body.username
 
-        response.redirect(redirectUrl)
+            response.redirect(redirectUrl)
         })
 
 
@@ -57,23 +55,23 @@ module.exports = (db) => {
 
     const stockpage = (request, response) => {
 
-    //stock requested could be e.g.AAPL
-    let stockrequested = request.query.stockname
+        //stock requested could be e.g.AAPL
+        let stockrequested = request.query.stockname
 
-    console.log(stockrequested)
+        console.log(stockrequested)
 
-    db.user.financialStatement(stockrequested, (error, result)=>{
+        db.user.financialStatement(stockrequested, (error, result) => {
 
 
             // console.log("fs" , result)
-            response.render('stock/StockDisplay', {ar:result});
+            response.render('stock/StockDisplay', { ar: result });
         })
 
     };
 
-    const updateStockDatabase = (request, response) =>{
+    const updateStockDatabase = (request, response) => {
 
-    response.send('updated!');
+        response.send('updated!');
 
     };
 
@@ -84,93 +82,90 @@ module.exports = (db) => {
         console.log("Loading homepage")
 
 
-        db.user.getIndexData( (error, result)=>{
+        db.user.getIndexData((error, result) => {
 
-            response.render('HomePage' ,{indexData:result});
+            response.render('HomePage', { indexData: result });
         })
 
 
     };
 
 
-  const authentication = (request, response) => {
+    const authentication = (request, response) => {
 
-    console.log("authetication controller working")
+        db.user.authentication(request.body, (error, queryResult, loginValue) => {
 
-    db.user.authentication (request.body, (error, queryResult, loginValue)=>{
+            let redirectUrl = '/user/' + request.body.name
 
-    let redirectUrl = '/user/' + request.body.name
+            response.cookie('login', loginValue);
+            response.cookie('username', request.body.name);
 
-        response.cookie('login', loginValue);
-        response.cookie('username', request.body.name);
-
-    response.redirect(redirectUrl);
-    });
+            response.redirect(redirectUrl);
+        });
 
 
-  };
+    };
 
-  const registerForm = (request, response) => {
+    const registerForm = (request, response) => {
 
-    response.render('user/NewUser');
+        response.render('user/NewUser');
 
-  };
+    };
 
 
-  const create = (request, response) => {
+    const create = (request, response) => {
 
-    db.user.checkusername(request.body.username, (error, result)=>{
+        db.user.checkusername(request.body.username, (error, result) => {
 
-      console.log("going to create new account")
+            console.log("going to create new account")
 
-      console.log(request.body)
+            console.log(request.body)
 
-      db.user.create(request.body, (error, queryResult) => {
+            db.user.create(request.body, (error, queryResult) => {
 
-        console.log(queryResult)
+                console.log(queryResult)
 
-        if (error) {
-          console.error('error getting user:', error);
-          response.sendStatus(500);
-        }
+                if (error) {
+                    console.error('error getting user:', error);
+                    response.sendStatus(500);
+                }
 
-        if (queryResult.rowCount >= 1) {
-          console.log('User created successfully');
+                if (queryResult.rowCount >= 1) {
+                    console.log('User created successfully');
 
-          // drop cookies to indicate user's logged in status and username
-          response.cookie('loggedIn', true);
-          response.cookie('username', request.body.username);
-        } else {
-          console.log('User could not be created');
-        }
+                    // drop cookies to indicate user's logged in status and username
+                    response.cookie('loggedIn', true);
+                    response.cookie('username', request.body.username);
+                } else {
+                    console.log('User could not be created');
+                }
 
-        // redirect to home page after creation
-        response.redirect('/');
-      });
-  });
+                // redirect to home page after creation
+                response.redirect('/');
+            });
+        });
 
+    };
+
+
+
+
+
+    /**
+     * ===========================================
+     * Export controller functions as a module
+     * ===========================================
+     */
+    return {
+        userpage,
+        addstock,
+        stockpage,
+        updateStockDatabase,
+        homepage,
+        authentication,
+        testdisplay,
+        registerForm,
+        create
+
+    };
 };
-
-
-
-
-
-  /**
-   * ===========================================
-   * Export controller functions as a module
-   * ===========================================
-   */
-  return {
-    userpage,
-    addstock,
-    stockpage,
-    updateStockDatabase,
-    homepage,
-    authentication,
-    testdisplay,
-    registerForm,
-    create
-
-  };
-};
-

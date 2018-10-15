@@ -2,20 +2,96 @@ var React = require("react");
 
 var Default = require("../Default");
 
+
+//create the <createTable> tag that takes in financial data and puts it into a table
+class CreateTable extends React.Component {
+  render() {
+
+    let arrayToProcess = this.props.allstock
+
+    //Create TopRoW (title)
+
+    let topRow = <tr>
+                    <th>Stockname</th>
+                    <th>Closing Price</th>
+                    <th>Target Price</th>
+                  </tr>
+
+
+    //creating the wholetable
+    let allRowDataMap = [topRow];
+
+    //populate each row
+    for (let i = 0; i < arrayToProcess.length; i++){
+    let specificStockData = arrayToProcess[i].data['currentPrice']
+
+    let dcf = arrayToProcess[i].data['dcf']
+
+    //process each row
+
+    let specificStockDates = Object.keys(specificStockData['Time Series (Daily)'])
+    let latestDate = specificStockDates[0]
+    let latestPrice = specificStockData['Time Series (Daily)'][latestDate]['4. close']
+    let stockname = specificStockData['Meta Data']['2. Symbol']
+
+    let targetPrice = dcf[stockname].DCF
+
+    console.log("target price", targetPrice)
+
+
+    let currentRow = <tr>
+                      <td>{stockname}</td>
+                      <td>{latestPrice}</td>
+                      <td>{targetPrice}</td>
+                    </tr>
+
+    allRowDataMap.push(currentRow);
+    }
+
+
+
+
+
+
+
+    return (
+      <table>
+      {allRowDataMap}
+      </table>
+
+
+
+    );
+  }
+}
+
 class UserPage extends React.Component {
   render() {
 
     let username = this.props.username;
     console.log("userpage username: " , username)
-    console.log("userpage watchlist: " , this.props.watchlist)
+
+    let watchListArray = this.props.watchlist
+    console.log("userpage jsxwatchlist: " , watchListArray)
+
+
+    //components of the tableview
+    let currentPriceData = this.props.watchlist[0].data['currentPrice']
+    let currentPriceDates = Object.keys(currentPriceData['Time Series (Daily)'])
+    let latestDate = currentPriceDates[0]
+    let latestPrice = currentPriceData['Time Series (Daily)'][latestDate]['4. close']
+
+    let stockname = currentPriceData['Meta Data']['2. Symbol']
+
 
 
     let addStockUrl = '/' + username + '/addstock'
     return (
       <Default>
 
-      {username}
-
+      <div class="name">
+       User: {username}
+      </div>
         <div>
         <h3>What stock would you like to follow</h3>
         <form method="POST" action={addStockUrl}>
@@ -26,10 +102,11 @@ class UserPage extends React.Component {
 
         </div>
 
+        <div class="table">
 
-        <h1>Stocks i follow</h1>
+        <CreateTable allstock = {watchListArray}></CreateTable>
 
-
+        </div>
 
 
 
